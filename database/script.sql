@@ -78,8 +78,8 @@ CREATE TABLE IF NOT EXISTS room_type (
 
 alter table room_type add unique (room_type_code,ref_hotel_code);
 
-insert into roles(role_name,role_code,created_by,created_date,updated_by,updated_date)
-values ('Admin', 'ADMIN', 'system', current_date, 'system', current_date);
+insert into roles(role_name,role_code,created_by,created_date,updated_by,updated_date,active_flag)
+values ('Admin', 'ADMIN', 'system', current_date, 'system', current_date,1);
 
-insert into roles(role_name,role_code,created_by,created_date,updated_by,updated_date)
-values ('User', 'USER', 'system', current_date, 'system', current_date);
+insert into roles(role_name,role_code,created_by,created_date,updated_by,updated_date,active_flag)
+values ('User', 'USER', 'system', current_date, 'system', current_date,1);

@@ -5,6 +5,7 @@ import com.hrs.booking.config.JwtGenerator;
 import com.hrs.booking.dto.request.JwtTokenRequest;
 import com.hrs.booking.dto.response.JwtTokenResponse;
 import com.hrs.booking.exception.InvalidUserNamePasswordException;
+import com.hrs.booking.model.User;
 import com.hrs.booking.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +13,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -48,9 +48,13 @@ public class AuthServiceImpl implements AuthService {
             throw new InvalidUserNamePasswordException("Username or Password is incorect!");
         }
 
+        User userLogin = userRepository.findByEmail(request.getEmail()).orElse(null);
+        if (userLogin == null) {
+            throw new InvalidUserNamePasswordException("Username not found");
+        }
         UserDetails userDetails = userDetailService.loadUserByUsername(request.getEmail());
         return JwtTokenResponse.builder()
-                .accessToken(jwtGenerator.generateToken(userDetails))
+                .accessToken(jwtGenerator.generateToken(userDetails, userLogin))
                 .tokenType("Bearer")
                 .expiredDate(new Date(System.currentTimeMillis() + jwtExpirationMs))
                 .build();

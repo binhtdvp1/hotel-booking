@@ -7,7 +7,6 @@ import java.util.Date;
 @Data
 public class BookingRequest {
 
-    private Long userId;
     private Long hotelId;
     private Long roomTypeId;
     private Date fromDate;

@@ -1,10 +1,13 @@
 package com.hrs.booking.config;
 
+import com.hrs.booking.model.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.io.Serializer;
 import io.jsonwebtoken.security.Keys;
+import io.swagger.models.auth.In;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -25,8 +28,15 @@ public class JwtGenerator {
     @Value("${jwt.expiration}")
     private int jwtExpirationMs;
 
+    private final String USER_ID = "userId";
+
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
+    }
+
+    public Integer extractUserId(String token) {
+         Claims claims = extractAllClaims(token);
+         return claims.get(USER_ID, Integer.class);
     }
 
     public Date extractExpiration(String token) {
@@ -46,12 +56,14 @@ public class JwtGenerator {
         return extractExpiration(token).before(new Date());
     }
 
-    public String generateToken(UserDetails userDetails) {
+    public String generateToken(UserDetails userDetails, User userLogin) {
         Map<String, Object> claims = new HashMap<>();
+        claims.put(USER_ID, userLogin.getId());
         return createToken(claims, userDetails.getUsername());
     }
 
     private String createToken(Map<String, Object> claims, String subject) {
+
         return Jwts.builder()
                 .claims(claims)
                 .subject(subject)
@@ -66,4 +78,5 @@ public class JwtGenerator {
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 }
+
 

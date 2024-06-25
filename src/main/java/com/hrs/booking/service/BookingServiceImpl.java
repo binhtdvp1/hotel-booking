@@ -1,8 +1,10 @@
 package com.hrs.booking.service;
 
+import com.hrs.booking.config.JwtGenerator;
 import com.hrs.booking.dto.response.BookingDetailResponse;
 import com.hrs.booking.enums.BookingStatus;
 import com.hrs.booking.dto.request.BookingRequest;
+import com.hrs.booking.handler.UserLoginHandler;
 import com.hrs.booking.model.Booking;
 import com.hrs.booking.model.Hotel;
 import com.hrs.booking.model.RoomType;
@@ -10,6 +12,7 @@ import com.hrs.booking.repository.BookingRepository;
 import com.hrs.booking.repository.HotelRepository;
 import com.hrs.booking.repository.RoomTypeRepository;
 import com.hrs.booking.util.DateTimeUtils;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,6 +26,9 @@ import java.util.List;
 public class BookingServiceImpl implements BookingService {
 
     @Autowired
+    private UserLoginHandler userLoginHandler;
+
+    @Autowired
     private BookingRepository bookingRepository;
 
     @Autowired
@@ -33,18 +39,18 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional
-    public Booking create(BookingRequest request) {
+    public Booking create(BookingRequest payload) {
 
         log.info("Start - register booking for user");
 
         Booking booking = new Booking();
         booking.setActiveFlag(1);
         booking.setStatus(BookingStatus.WAITING_CHECK_IN.name());
-        booking.setFromDate(DateTimeUtils.clearTime(request.getFromDate()));
-        booking.setToDate(DateTimeUtils.clearTime(request.getToDate()));
-        booking.setRefHotelId(request.getHotelId());
-        booking.setRefRoomTypeId(request.getRoomTypeId());
-        booking.setRefUserId(request.getUserId());
+        booking.setFromDate(DateTimeUtils.clearTime(payload.getFromDate()));
+        booking.setToDate(DateTimeUtils.clearTime(payload.getToDate()));
+        booking.setRefHotelId(payload.getHotelId());
+        booking.setRefRoomTypeId(payload.getRoomTypeId());
+        booking.setRefUserId(userLoginHandler.getLoginUserId());
         booking.setCreatedBy("system");
         booking.setUpdatedBy("system");
 
@@ -62,6 +68,7 @@ public class BookingServiceImpl implements BookingService {
     private BookingDetailResponse convert(Booking booking) {
 
         log.info("Start - convert booking detail");
+
         Hotel hotel = hotelRepository.findById(booking.getRefHotelId()).orElseThrow();
         RoomType roomType = roomTypeRepository.findById(booking.getRefRoomTypeId()).orElseThrow();
         BookingDetailResponse response = new BookingDetailResponse();
